@@ -2,10 +2,8 @@ package org.example
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
-
 import java.text.SimpleDateFormat
 import java.util.Date
-
 
 object Logfile2 extends App {
   case class LogLine(debug_level: String, timestamp: Date, download_id: Integer,
@@ -35,7 +33,7 @@ object Logfile2 extends App {
        take(8).toList
      println(s" The client with most HTTP Request :  $http_request ")
    }
-    // 6.	Which client did most FAILED HTTP requests? Use group_by to provide an answer.
+    // 6.	Which client did most FAILED HTTP requests?
    val failed_http= logrdd.filter(_.retrieval_stage == "api_client").
       filter(_.rest.startsWith("Failed")).
       keyBy(_.download_id).
