@@ -13,7 +13,7 @@ object Logfile extends App {
   spark.sparkContext.setLogLevel("ERROR")
 
   // 1.	Write a function to load it in an RDD.
-  val logDf = spark.read.textFile("src/main/resources/ghtorrent-logs.txt")
+  val logDf = Service1.readDs("src/main/resources/ghtorrent-logs.txt")
   val parsed_log: DataFrame = Service1.parsefile(logDf)
 
   println(s"Number of lines in the RDD : ${Service1.count_lines(parsed_log)}")
