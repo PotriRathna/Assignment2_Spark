@@ -5,6 +5,10 @@ import org.apache.spark.sql.functions.regexp_extract
 
 object Service1  {
 
+   def readDs(path:String)(implicit spark:SparkSession):Dataset[String]={
+    spark.read.textFile(path)
+  }
+  
   def parsefile(file: Dataset[String])(implicit spark:SparkSession):DataFrame = {
     import spark.implicits._
     val parse_logdf = file.select(regexp_extract($"value", """^([^(\s|,)]+)""", 1).alias("host"),
