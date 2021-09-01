@@ -4,31 +4,17 @@ import org.apache.spark.sql.SparkSession
 import org.scalatest._
 import org.scalatest.funsuite.AnyFunSuite
 
-class TestLogfile2 extends AnyFunSuite with BeforeAndAfterEach{
+class TestService2_Logfile2 extends AnyFunSuite with BeforeAndAfterEach{
 
   Logger.getLogger("org").setLevel(Level.ERROR)
-  val spark = SparkSession.builder().master("local[*]").appName("LogFile").getOrCreate()
-  val logrdd=Logfile2.parsefile(spark)
+  implicit val spark = SparkSession.builder().master("local[*]").appName("LogFile").getOrCreate()
+  val logrdd=Service2_Logfile2.parsefile()
 
-  assert(Logfile2.httprequest(logrdd)=== logrdd.filter(_.retrieval_stage == "api_client").
-    keyBy(_.download_id).
-    mapValues(l => 1).reduceByKey((a, b) => a + b).
-    sortBy(x => x._2, false).take(8))
-
-  assert(Logfile2.failedrequest(logrdd) === logrdd.filter(_.retrieval_stage == "api_client").
-    filter(_.rest.startsWith("Failed")).keyBy(_.download_id).
-    mapValues(l => 1).reduceByKey((a, b) => a + b).
-    sortBy(x => x._2,false).take(8))
-
-  assert(Logfile2.active(logrdd)===logrdd.keyBy(_.timestamp.getHours).
-    mapValues(l => 1).reduceByKey((a, b) => a + b).
-    sortBy(x => x._2,false).take(8))
-
-  val repository = logrdd.filter(_.retrieval_stage == "api_client").
-    map(_.rest.split("/").slice(4, 6).mkString("/").takeWhile(_ != '?'))
-  assert(Logfile2.activerepos(logrdd)===repository.filter(_.nonEmpty).
-    map(x => (x, 1)).reduceByKey((a, b) => a + b).
-    sortBy(x => x._2,false).take(5))
+  assert(Service2_Logfile2.httprequest(logrdd).toList=== List((13,3983), (21,2988), (40,908), (20,834), (42,796), (2,783), (47,745), (4,744)))
+  assert(Service2_Logfile2.failedrequest(logrdd).toList ===List((13,2321), (21,43), (40,27), (22,17), (1,14),(42,13)))
+  assert(Service2_Logfile2.active(logrdd).toList===List((10,78000), (9,69950), (11,68685), (12,38054), (13,11657), (20,7989), (14,2407), (16,390)))
+  assert(Service2_Logfile2.activerepos(logrdd).toList===List(("greatfakeman/Tabchi",2318), ("mithro/chromium-infra",115),
+    ("shuhongwu/hockeyapp",74), ("obophenotype/human-phenotype-ontology",73), ("ssbattousai/Cuda36",39)))
 
   spark.stop()
 }
